@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>InfiniteCulling - Dependency free (ECMAScript 5.1) Culling algorithm for 2D DOM and Canvas objects.</title>
+    <script type="text/javascript" src="//d3js.org/d3.v3.js"></script>
+    <script type="text/javascript" src="src/infiniteculling.js"></script>
+    <style>
+        table, div {
+            margin-left: 50px;
+        }
+
+        td {
+            width: 20px;
+            height: 20px;
+            background: black;
+            visibility: hidden;
+            border: 1px solid grey;
+        }
+
+        div {
+            top: -100px;
+            width: 50px;
+            height: 50px;
+            position: relative;
+            border: 1px solid grey;
+            background: rgba(1, 1, 1, 0.5);
+        }
+    </style>
+</head>
+<body>
+<pre>
+/*
+ *  InfiniteCulling - Dependency free (ECMAScript 5.1) Culling algorithm for 2D DOM and Canvas objects.
+ *
+ *  - init
+ *    - store elements and current min/max of x,y
+ *    - store sorted lists of left, right, top, bottom edges of bounding boxes
+ *    - find index of first possibly visible element in each list
+ *    - take intersection of possibly visible indices and make visible
+ *
+ *  - move
+ *    - if min of x,y decreases or max of x,y increases then show elements from index until first non-visible
+ *    - if min of x,y increases or max of x,y decreases then hide elements from index until first visible
+ *
+ *  - add
+ *    - add new/removed element to culling
+ *
+ *  - remove
+ *    - remove element from culling
+ *
+ *  - update
+ *    - remove element from culling, update bounds, add element again
+ */
+</pre>
+<table>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+<div></div>
+<script>
+(function () {
+    'use strict';
+    /*global InfiniteCulling, document, window*/
+
+    function setElementBounds(element) {
+        var dim, bounds = Object.getPrototypeOf(element).getBoundingClientRect();
+
+        for (dim in bounds) {
+            if (bounds.hasOwnProperty(dim)) {
+                // being explicit
+                Object.defineProperty(element, dim, {
+                    enumerable: true,
+                    configurable: true,
+                    writable: true,
+                    value: bounds[dim]
+                });
+            }
+        }
+    }
+
+    function createObject(o) {
+        return Object.create(o);
+    }
+
+    // construct new InfiniteCulling instance
+    var culling = new InfiniteCulling(),
+        $ = document.querySelectorAll.bind(document),
+        divBounds = $('div')[0].getBoundingClientRect(),
+        tds = Array.prototype.map.call($('td'), createObject);
+
+    tds.forEach(setElementBounds);
+
+    // initialize and cull visible elements
+    culling.init(tds, divBounds, true);
+
+    /*globals d3*/
+    d3.selectAll('td').on('click', function () {
+        if (this.disabled) {
+            culling.add(this.removedCullingNode);
+            this.disabled = false;
+        } else {
+            this.removedCullingNode = culling.remove(this);
+            this.disabled = true;
+        }
+    });
+    // Init dragger for testing
+    d3.select('div').call(
+        d3.behavior.drag()
+            .origin(function origin() {
+                var style = window.getComputedStyle(this, null) || this.style,
+                    left = parseInt(style.left, 10) || 0,
+                    top = parseInt(style.top, 10) || 0;
+
+                return {
+                    x: left,
+                    y: top
+                };
+            })
+            .on('drag', function drag() {
+                d3.select(this).style({
+                    top: d3.event.y + 'px',
+                    left: d3.event.x + 'px'
+                });
+
+                var bounds = this.getBoundingClientRect();
+                culling.move(bounds.top, bounds.left, bounds.right, bounds.bottom);
+            })
+    );
+}());
+
+</script>
+</body>
+</html>
