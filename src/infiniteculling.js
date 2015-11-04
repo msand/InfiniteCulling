@@ -204,7 +204,7 @@
 
         if (ni === -1) {
             for (i = 0, l = list.length; i < l; i++) {
-                if (Object.getPrototypeOf(list[i]) === node) {
+                if (list[i].element === node) {
                     ni = i;
                     break;
                 }
@@ -241,7 +241,7 @@
 
         function setVisible(index) {
             var node = list[index];
-            node.style.visibility = isVisible(node) ? 'visible' : 'hidden';
+            node.element.style.visibility = isVisible(node) ? 'visible' : 'hidden';
         }
 
         function setInitialVisible() {
@@ -253,7 +253,7 @@
 
             Object.keys(t).forEach(function makeVisible(index) {
                 if (l.hasOwnProperty(index) && r.hasOwnProperty(index) && b.hasOwnProperty(index)) {
-                    list[index].style.visibility = 'visible';
+                    list[index].element.style.visibility = 'visible';
                 }
             });
         }

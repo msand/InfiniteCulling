@@ -96,33 +96,17 @@
     'use strict';
     /*global InfiniteCulling, document, window*/
 
-    function setElementBounds(element) {
-        var dim, bounds = Object.getPrototypeOf(element).getBoundingClientRect();
-
-        for (dim in bounds) {
-            if (bounds.hasOwnProperty(dim)) {
-                // being explicit
-                Object.defineProperty(element, dim, {
-                    enumerable: true,
-                    configurable: true,
-                    writable: true,
-                    value: bounds[dim]
-                });
-            }
-        }
-    }
-
-    function createObject(o) {
-        return Object.create(o);
+    function createNode(element) {
+        var bounds = element.getBoundingClientRect();
+        bounds.element = element;
+        return bounds;
     }
 
     // construct new InfiniteCulling instance
     var culling = new InfiniteCulling(),
         $ = document.querySelectorAll.bind(document),
         divBounds = $('div')[0].getBoundingClientRect(),
-        tds = Array.prototype.map.call($('td'), createObject);
-
-    tds.forEach(setElementBounds);
+        tds = Array.prototype.map.call($('td'), createNode);
 
     // initialize and cull visible elements
     culling.init(tds, divBounds, true);
